@@ -1,0 +1,56 @@
+// Regras do Firestore do Inatelinos.
+//
+// Garantem, no servidor, que apenas contas com e-mail @inatel.br
+// (ou @sigla.inatel.br) e com o e-mail JÁ CONFIRMADO acessem os dados.
+// Esta é a fonte da verdade das regras — o deploy é feito por este repositório
+// (inatelinos-server) via GitHub Actions ao dar merge na branch main.
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function userIsInatelino() {
+      return request.auth != null
+        && request.auth.token.email is string
+        && request.auth.token.email.matches('[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+[.])*inatel[.]br')
+        && request.auth.token.email_verified == true;
+    }
+
+    match /{path=**}/posts/{postId} {
+      allow read, write: if userIsInatelino();
+    }
+
+    match /{path=**}/stories/{storiesId} {
+      allow read, write: if userIsInatelino();
+    }
+
+    match /{path=**}/reels/{reelsId} {
+      allow read, write: if userIsInatelino();
+    }
+
+    match /{path=**}/saved/{saveId} {
+      allow read, write: if userIsInatelino();
+    }
+
+    match /{path=**}/chat/{chatId} {
+      allow read, write: if userIsInatelino();
+    }
+
+    match /{path=**}/chat/{chatId}/messages/{messagesId} {
+      allow read, write: if userIsInatelino();
+    }
+
+    match /{path=**}/notifications/{chatId} {
+      allow read, write: if userIsInatelino();
+    }
+
+    match /users/{userId} {
+      allow read, write: if userIsInatelino();
+    }
+
+    match /reports/{reportId} {
+      allow read, write: if userIsInatelino();
+    }
+  }
+}

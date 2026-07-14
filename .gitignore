@@ -1,0 +1,15 @@
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Credenciais (NUNCA commitar service accounts)
+*service-account*.json
+serviceAccountKey.json
+.env
+.env*.local
+
+# Sistema
+.DS_Store
+node_modules/
