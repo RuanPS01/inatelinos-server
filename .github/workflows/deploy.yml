@@ -35,11 +35,32 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
-      - name: Deploy das regras e índices
+      # Firestore (regras + índices) funciona no plano gratuito (Spark).
+      - name: Deploy das regras e índices do Firestore
         run: |
           firebase deploy \
-            --only firestore:rules,firestore:indexes,storage \
+            --only firestore:rules,firestore:indexes \
             --project "$FIREBASE_PROJECT_ID" \
             --non-interactive
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+
+      # O Storage exige que o bucket já tenha sido inicializado no console
+      # (Storage → Get Started). Em projetos novos, essa ativação pode pedir o
+      # plano Blaze. Enquanto o Storage não estiver ativo, este passo apenas
+      # avisa — sem derrubar o pipeline do Firestore.
+      - name: Deploy das regras do Storage (opcional)
+        continue-on-error: true
+        run: |
+          if firebase deploy \
+            --only storage \
+            --project "$FIREBASE_PROJECT_ID" \
+            --non-interactive; then
+            echo "✅ Regras do Storage publicadas."
+          else
+            echo "::warning::Storage ainda não ativado neste projeto. Ative em" \
+              "Firebase Console → Storage → Get Started e rode o workflow de novo." \
+              "Firestore já foi publicado com sucesso."
+          fi
         env:
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}

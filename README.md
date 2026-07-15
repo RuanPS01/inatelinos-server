@@ -33,6 +33,29 @@ workflow**.
 Fluxo recomendado: crie uma branch, altere as regras/índices, abra um PR e,
 ao aprovar e mergear na `main`, o deploy acontece sozinho.
 
+O workflow tem dois passos:
+1. **Firestore (regras + índices)** — funciona no plano gratuito (Spark).
+2. **Storage (regras)** — passo **opcional** que não derruba o pipeline. Só
+   é publicado depois que o Storage estiver ativado no projeto (veja abaixo).
+
+### Ativar o Cloud Storage (necessário para o deploy do Storage)
+
+O deploy do Storage falha com *"Firebase Storage has not been set up on
+project"* enquanto o bucket não for inicializado **uma vez** no console:
+
+- Firebase Console → **Build → Storage → Get Started**.
+
+Sobre o plano: o Firestore roda tranquilo no **Spark (grátis)**. Já a ativação
+do **Cloud Storage** passou a exigir o plano **Blaze** em projetos novos — o
+console avisa na hora do *Get Started*. O Blaze tem **franquia gratuita**
+(Storage: ~5 GB armazenados e cotas diárias de download/upload) e só cobra
+acima disso, mas exige vincular uma **conta de faturamento** (cartão). O app
+e a web usam o Storage para **upload de imagens** (posts, stories e fotos de
+perfil); sem ele, todo o resto funciona, mas os envios de imagem ficam
+indisponíveis até o Storage ser ativado. Ativado o Storage, rode o workflow
+novamente (**Actions → Deploy Firebase config → Run workflow**) para publicar
+as regras.
+
 ### Configuração única dos secrets (obrigatório)
 
 O deploy usa uma **conta de serviço** do Google Cloud. Configure dois secrets
